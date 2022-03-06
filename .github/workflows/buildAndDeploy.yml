@@ -1,17 +1,20 @@
-name: buildAndDeploy
-on:
-  push
+name: Build and Deploy
+on: [push]
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest # 我们选择使用最新的ubuntu系统
+    concurrency: ci-${{ github.ref }} # Recommended if you intend to make multiple deployments in quick succession.
+    runs-on: ubuntu-latest
     steps:
-    - name: checkout
-      uses: actions/checkout@master # 将代码拷贝到虚机中
+      - name: Checkout
+        uses: actions/checkout@v2
 
-    - name: buildAndDeploy
-      uses: JamesIves/github-pages-deploy-action@v4.2.5
-      env:
-        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }} # 使用刚新建的secret
-        BRANCH: gh-pages # 存放产物的分支名称
-        FOLDER: dist # 存放build后产物的目录
-        BUILD_SCRIPT: npm install && npm run build # 执行的命令
+      - name: Install and Build  # This example project is built using npm and outputs the result to the 'build' folder. Replace with the commands required to build your project, or remove this step entirely if your site is pre-built.
+        run: |
+          npm ci
+          npm run build
+
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@v4.2.5
+        with:
+          branch: gh-pages # The branch the action should deploy to.
+          folder: build # The folder the action should deploy.
