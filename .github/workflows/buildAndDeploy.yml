@@ -21,7 +21,7 @@ jobs:
       run: |
         cd ./vue-actions-deploy
         npm install
-        npm run-script build
+        npm run build
     # 发布
     - name: Deploy
       uses: JamesIves/github-pages-deploy-action@releases/v3
