@@ -1,20 +1,34 @@
-name: Build and Deploy
-on: [push]
+# 自定义当前执行文件的名称
+name: GitHub Actions Build and Deploy Demo
+# 整个流程在master分支发生push事件时触发
+on:
+  push:
+    branches:
+      - master
 jobs:
   build-and-deploy:
-    concurrency: ci-${{ github.ref }} # Recommended if you intend to make multiple deployments in quick succession.
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # 运行在ubuntu-latest环境的虚拟机中
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Install and Build  # This example project is built using npm and outputs the result to the 'build' folder. Replace with the commands required to build your project, or remove this step entirely if your site is pre-built.
-        run: |
-          npm ci
-          npm run build
-
-      - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@v4.2.5
-        with:
-          branch: gh-pages # The branch the action should deploy to.
-          folder: build # The folder the action should deploy.
+    # 获取仓库源码
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        persist-credentials: false
+    # 构建和部署
+    - name: Install and Build
+      # 由于示例项目代码并非在根目录,所以要这里手动进入了项目目录
+      # 如果你代码本身就处于根目录则不需要再手动进入了
+      run: |
+        cd ./vue-actions-deploy
+        npm install
+        npm run-script build
+    # 发布
+    - name: Deploy
+      uses: JamesIves/github-pages-deploy-action@releases/v3
+      # 环境变量
+      with:
+        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }} # GitHub 密钥 ACCESS_TOKEN 是在第二步Settings的Secrets中新增时定义的Name,要保持一致
+        # 发布到指定分支
+        BRANCH: gh-pages
+        # 构建成果所在目录,默认位置都是在根目录
+        FOLDER: ./react_project/build
